@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">AgoraApp</string>
+
+    <string name="facebook_app_id">2669886676676373</string>
+
+    <!-- Facebook login protocol scheme -->
+    <string name="fb_login_protocol_scheme">fb2669886676676373</string>
+
+    <!-- Google Web Client ID (replace with value from google-services.json) -->
+    <string name="default_web_client_id">149314068234-i9k0lhm5oqhk1m1tp9hg6b1tdch8qm0d.apps.googleusercontent.com…</string>
 </resources>
