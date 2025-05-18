@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
             AgoraAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        name = "Emil",
+                        name = "",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
