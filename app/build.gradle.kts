@@ -56,6 +56,8 @@ dependencies {
 
     implementation("com.google.android.gms:play-services-auth:20.5.0")
 
+    implementation("com.facebook.android:facebook-login:18.0.3")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

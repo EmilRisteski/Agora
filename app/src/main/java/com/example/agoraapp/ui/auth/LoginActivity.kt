@@ -1,5 +1,6 @@
-package com.example.agoraapp.auth
+package com.example.agoraapp.ui.auth
 
+import androidx.compose.ui.Alignment
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -13,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.agoraapp.auth.RegisterActivity
+import com.example.agoraapp.ui.auth.RegisterActivity
 import com.google.firebase.auth.FirebaseAuth
 
 class LoginActivity : ComponentActivity() {
