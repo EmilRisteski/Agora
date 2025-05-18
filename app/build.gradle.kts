@@ -50,13 +50,10 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
-    // Firebase BOM for managing Firebase library versions
     implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
 
-    // Firebase Authentication Kotlin extensions
     implementation("com.google.firebase:firebase-auth-ktx")
 
-    // Google Sign-In
     implementation("com.google.android.gms:play-services-auth:20.5.0")
 
     testImplementation(libs.junit)
