@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">AgoraApp</string>
 
@@ -6,6 +7,19 @@
     <!-- Facebook login protocol scheme -->
     <string name="fb_login_protocol_scheme">fb2669886676676373</string>
 
+    <string name="facebook_client_token">8fbdaa651c5523b78c2f79ef9bd9737f</string>
+
     <!-- Google Web Client ID (replace with value from google-services.json) -->
-    <string name="default_web_client_id">149314068234-i9k0lhm5oqhk1m1tp9hg6b1tdch8qm0d.apps.googleusercontent.com…</string>
+    <string name="default_web_client_id">149314068234-i9k0lhm5oqhk1m1tp9hg6b1tdch8qm0d.apps.googleusercontent.com</string>
+
+    <!-- Strings for login screen -->
+<!--    <string name="login_title">Login</string>-->
+<!--    <string name="email_label">Email</string>-->
+<!--    <string name="password_label">Password</string>-->
+<!--    <string name="login_button">Login</string>-->
+<!--    <string name="continue_as_guest_button">Continue as Guest</string>-->
+<!--    <string name="dont_have_account_register">Don&#39;t have an account? Register here</string>-->
+<!--    <string name="please_enter_email_and_password">Please enter email and password</string>-->
+<!--    <string name="anonymous_login_successful">Anonymous login successful!</string>-->
+<!--    <string name="anonymous_login_failed">Anonymous login failed: %1$s</string>-->
 </resources>

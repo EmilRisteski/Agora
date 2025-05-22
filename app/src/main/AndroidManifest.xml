@@ -2,7 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
+        android:name=".AgoraApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -17,6 +20,10 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
+
+        <meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="@string/facebook_client_token" />
 
         <!-- Facebook login activity -->
         <activity
@@ -33,8 +40,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Replace fb123456789 with your real Facebook App ID -->
-                <data android:scheme="fb123456789" />
+                <data android:scheme="fb2669886676676373" />
             </intent-filter>
         </activity>
 
@@ -56,8 +62,15 @@
 
         <activity
             android:name=".ui.auth.RegisterActivity"
-            android:exported="false"
-            android:theme="@style/Theme.AgoraApp" />
+            android:exported="true"
+            android:theme="@style/Theme.AgoraApp">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="fb2669886676676373" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".MainActivity"
