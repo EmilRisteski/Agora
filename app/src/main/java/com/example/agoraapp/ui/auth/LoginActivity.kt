@@ -15,7 +15,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.agoraapp.ui.auth.RegisterActivity
+import com.example.agoraapp.HomeActivity
+import com.example.agoraapp.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -43,14 +44,20 @@ class LoginActivity : ComponentActivity() {
         // Initialize Firebase Auth
         auth = FirebaseAuth.getInstance()
 
-        // Initialize Google Sign-In
+        // Skip login if already logged in
+        if (auth.currentUser != null) {
+            goToHome()
+            return
+        }
+
+        // Google Sign-In setup
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(com.example.agoraapp.R.string.default_web_client_id))
+            .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        // Initialize Facebook SDK and Callback Manager
+        // Facebook SDK and callback
         FacebookSdk.sdkInitialize(applicationContext)
         callbackManager = CallbackManager.Factory.create()
 
@@ -69,6 +76,12 @@ class LoginActivity : ComponentActivity() {
         }
     }
 
+    private fun goToHome() {
+        val intent = Intent(this, HomeActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+
     private fun loginUser(email: String, password: String) {
         if (email.isBlank() || password.isBlank()) {
             Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show()
@@ -78,7 +91,7 @@ class LoginActivity : ComponentActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-                    // TODO: Navigate to your main/home screen
+                    goToHome()
                 } else {
                     Toast.makeText(this, "Login failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
@@ -90,16 +103,32 @@ class LoginActivity : ComponentActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     Toast.makeText(this, "Anonymous login successful!", Toast.LENGTH_SHORT).show()
-                    // TODO: Navigate to your main/home screen
+                    // Navigate to HomeActivity
+                    startActivity(Intent(this, HomeActivity::class.java))
+                    finish() // Close LoginActivity so user can't go back
                 } else {
                     Toast.makeText(this, "Anonymous login failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }
     }
 
+
     private fun signInWithGoogle() {
         val signInIntent = googleSignInClient.signInIntent
         startActivityForResult(signInIntent, GOOGLE_SIGN_IN_REQUEST_CODE)
+    }
+
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    Toast.makeText(this, "Google login successful", Toast.LENGTH_SHORT).show()
+                    goToHome()
+                } else {
+                    Toast.makeText(this, "Google login failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                }
+            }
     }
 
     private fun loginWithFacebook() {
@@ -108,11 +137,13 @@ class LoginActivity : ComponentActivity() {
             object : FacebookCallback<LoginResult> {
                 override fun onSuccess(result: LoginResult) {
                     Toast.makeText(this@LoginActivity, "Facebook login successful!", Toast.LENGTH_SHORT).show()
-                    // TODO: Handle Facebook login with Firebase or app flow
+                    goToHome()
                 }
+
                 override fun onCancel() {
                     Toast.makeText(this@LoginActivity, "Facebook login cancelled.", Toast.LENGTH_SHORT).show()
                 }
+
                 override fun onError(error: FacebookException) {
                     Toast.makeText(this@LoginActivity, "Facebook login error: ${error.message}", Toast.LENGTH_LONG).show()
                 }
@@ -121,8 +152,6 @@ class LoginActivity : ComponentActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
-        // Pass activity result to Facebook callbackManager
         callbackManager.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == GOOGLE_SIGN_IN_REQUEST_CODE) {
@@ -134,19 +163,6 @@ class LoginActivity : ComponentActivity() {
                 Toast.makeText(this, "Google sign in failed: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
-    }
-
-    private fun firebaseAuthWithGoogle(idToken: String) {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-        auth.signInWithCredential(credential)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    Toast.makeText(this, "Google login successful", Toast.LENGTH_SHORT).show()
-                    // TODO: Navigate to your main/home screen
-                } else {
-                    Toast.makeText(this, "Google login failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-                }
-            }
     }
 }
 

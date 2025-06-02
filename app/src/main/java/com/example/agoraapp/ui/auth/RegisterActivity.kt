@@ -1,6 +1,5 @@
 package com.example.agoraapp.ui.auth
 
-import com.example.agoraapp.R
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -15,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.agoraapp.R
+import com.example.agoraapp.HomeActivity
 import com.facebook.*
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
@@ -28,10 +29,8 @@ import com.google.firebase.auth.GoogleAuthProvider
 class RegisterActivity : ComponentActivity() {
 
     private lateinit var auth: FirebaseAuth
-
     private lateinit var googleSignInClient: GoogleSignInClient
     private val RC_GOOGLE_SIGN_IN = 9001
-
     private lateinit var callbackManager: CallbackManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,9 +38,9 @@ class RegisterActivity : ComponentActivity() {
 
         auth = FirebaseAuth.getInstance()
 
-        // Configure Google Sign In
+        // Configure Google Sign-In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id)) // from google-services.json
+            .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
 
@@ -80,26 +79,27 @@ class RegisterActivity : ComponentActivity() {
     }
 
     private fun registerUser(email: String, password: String, confirmPassword: String) {
-        if(email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
+        if (email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
             return
         }
-        if(password != confirmPassword) {
+        if (password != confirmPassword) {
             Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
             return
         }
+
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
-                if(task.isSuccessful) {
+                if (task.isSuccessful) {
                     Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show()
-                    finish() // close register and return to login
+                    startActivity(Intent(this, HomeActivity::class.java))
+                    finish()
                 } else {
                     Toast.makeText(this, "Registration failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }
     }
 
-    // Google sign-in
     private fun signInWithGoogle() {
         val signInIntent = googleSignInClient.signInIntent
         startActivityForResult(signInIntent, RC_GOOGLE_SIGN_IN)
@@ -127,6 +127,7 @@ class RegisterActivity : ComponentActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     Toast.makeText(this, "Google sign-in successful", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, HomeActivity::class.java))
                     finish()
                 } else {
                     Toast.makeText(this, "Google sign-in failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
@@ -134,7 +135,6 @@ class RegisterActivity : ComponentActivity() {
             }
     }
 
-    // Facebook sign-in
     private fun signInWithFacebook() {
         LoginManager.getInstance().logInWithReadPermissions(this, listOf("email", "public_profile"))
     }
@@ -145,6 +145,7 @@ class RegisterActivity : ComponentActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     Toast.makeText(this, "Facebook sign-in successful", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, HomeActivity::class.java))
                     finish()
                 } else {
                     Toast.makeText(this, "Facebook sign-in failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
