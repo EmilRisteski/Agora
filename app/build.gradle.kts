@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
+    // Removed the duplicate Kotlin Android plugin here
 }
 
 android {
@@ -51,12 +52,14 @@ dependencies {
     implementation(libs.androidx.material3)
 
     implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
-
     implementation("com.google.firebase:firebase-auth-ktx")
-
     implementation("com.google.android.gms:play-services-auth:20.5.0")
-
     implementation("com.facebook.android:facebook-login:18.0.3")
+    implementation("com.jakewharton.threetenabp:threetenabp:1.4.5")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-messaging-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
