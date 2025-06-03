@@ -4,32 +4,70 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.lifecycle.lifecycleScope
-import com.example.agoraapp.MainActivity
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.agoraapp.R
 import com.example.agoraapp.ui.auth.LoginActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class SplashActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Show splash UI - you can customize this with Compose or a layout
         setContent {
-            // Simple Splash UI (you can improve this)
-            androidx.compose.material3.Text(text = "Welcome to AgoraApp")
+            val context = LocalContext.current
+            val scope = rememberCoroutineScope()
+
+            // Launch navigation after a delay
+            LaunchedEffect(Unit) {
+                delay(2000)
+                context.startActivity(Intent(context, LoginActivity::class.java))
+                finish()
+            }
+
+            SplashScreenUI()
         }
+    }
+}
 
-        // Wait for 2 seconds then navigate
-        lifecycleScope.launch {
-            delay(2000)
-
-            // TODO: Check if user is logged in, for now always go to LoginActivity
-            val nextActivity = Intent(this@SplashActivity, LoginActivity::class.java)
-
-            startActivity(nextActivity)
-            finish() // close splash so user can't go back to it
+@Composable
+fun SplashScreenUI() {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.agora_logo), // Make sure you have a logo in drawable
+                contentDescription = "App Logo",
+                modifier = Modifier
+                    .size(120.dp)
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = "Welcome to Agora",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
