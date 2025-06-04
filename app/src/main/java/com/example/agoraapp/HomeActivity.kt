@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,20 +13,85 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.room.*
+import com.example.agoraapp.ui.auth.LoginActivity
 import com.example.agoraapp.ui.theme.AgoraAppTheme
 import com.google.firebase.auth.FirebaseAuth
-import com.example.agoraapp.ui.auth.LoginActivity
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.*
 import org.threeten.bp.LocalDate
 import org.threeten.bp.format.DateTimeFormatter
+
+@Entity(tableName = "events")
+data class Event(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val title: String,
+    val date: LocalDate,
+    val location: String,
+    val isLiked: Boolean = false
+)
+
+class Converters {
+    @TypeConverter
+    fun fromLocalDate(date: LocalDate): String = date.toString()
+
+    @TypeConverter
+    fun toLocalDate(value: String): LocalDate = LocalDate.parse(value)
+}
+
+@Dao
+interface EventDao {
+    @Query("SELECT * FROM events")
+    suspend fun getAllEvents(): List<Event>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertEvent(event: Event)
+
+    @Delete
+    suspend fun deleteEvent(event: Event)
+}
+
+@Database(entities = [Event::class], version = 1)
+@TypeConverters(Converters::class)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun eventDao(): EventDao
+}
+
+fun Event.toFirebaseMap(): Map<String, Any> = mapOf(
+    "title" to title,
+    "date" to date.toString(),
+    "location" to location,
+    "isLiked" to isLiked
+)
+
+fun deleteEventFromFirebase(title: String, date: LocalDate) {
+    val db = FirebaseFirestore.getInstance()
+    db.collection("events")
+        .whereEqualTo("title", title)
+        .whereEqualTo("date", date.toString())
+        .get()
+        .addOnSuccessListener { result ->
+            result.documents.forEach { it.reference.delete() }
+        }
+}
 
 class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java,
+            "events-db"
+        ).build()
+
         setContent {
             AgoraAppTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     HomeScreen(
+                        database = db,
                         onLogout = {
                             FirebaseAuth.getInstance().signOut()
                             startActivity(Intent(this, LoginActivity::class.java))
@@ -46,31 +110,61 @@ sealed class HomeTab(val label: String, val icon: androidx.compose.ui.graphics.v
     object Logout : HomeTab("Logout", Icons.Filled.ExitToApp)
 }
 
-data class Event(
-    val title: String,
-    val date: LocalDate,
-    val location: String
-)
-
 @Composable
-fun HomeScreen(onLogout: () -> Unit) {
+fun HomeScreen(
+    database: AppDatabase,
+    onLogout: () -> Unit
+) {
     var selectedTab by remember { mutableStateOf<HomeTab>(HomeTab.Discover) }
     val tabs = listOf(HomeTab.Discover, HomeTab.MyEvents, HomeTab.Logout)
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
-    val events = listOf(
-        Event(
-            title = "BIJELO DUGME",
-            date = LocalDate.of(2025, 5, 31),
-            location = "Arena Boris Trajkoski, Skopje"
-        ),
-        Event(
-            title = "Teatarski Igri",
-            date = LocalDate.of(2025, 6, 8),
-            location = "Prilep, North Macedonia"
-        )
-    )
-
+    val allEvents = remember { mutableStateListOf<Event>() }
     val likedEvents = remember { mutableStateListOf<Event>() }
+    var showDialog by remember { mutableStateOf(false) }
+
+    // Load local and remote events on launch
+    LaunchedEffect(Unit) {
+        // Load local events from Room
+        val localEvents = withContext(Dispatchers.IO) {
+            database.eventDao().getAllEvents()
+        }
+        allEvents.addAll(localEvents)
+        likedEvents.addAll(localEvents.filter { it.isLiked })
+
+        // Fetch remote events from Firestore
+        FirebaseFirestore.getInstance()
+            .collection("events")
+            .get()
+            .addOnSuccessListener { result ->
+                val remoteEvents = result.documents.mapNotNull { doc ->
+                    val title = doc.getString("title")
+                    val location = doc.getString("location")
+                    val dateStr = doc.getString("date")
+                    val isLiked = doc.getBoolean("isLiked") ?: false
+                    try {
+                        if (title != null && location != null && dateStr != null) {
+                            val date = LocalDate.parse(dateStr)
+                            Event(title = title, location = location, date = date, isLiked = isLiked)
+                        } else null
+                    } catch (_: Exception) {
+                        null
+                    }
+                }
+
+                val newEvents = remoteEvents.filterNot { re ->
+                    allEvents.any { it.title == re.title && it.date == re.date }
+                }
+
+                scope.launch {
+                    withContext(Dispatchers.IO) {
+                        newEvents.forEach { database.eventDao().insertEvent(it) }
+                    }
+                    allEvents.addAll(newEvents)
+                }
+            }
+    }
 
     Scaffold(
         bottomBar = {
@@ -87,24 +181,54 @@ fun HomeScreen(onLogout: () -> Unit) {
                     )
                 }
             }
+        },
+        floatingActionButton = {
+            if (selectedTab is HomeTab.Discover) {
+                FloatingActionButton(onClick = { showDialog = true }) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Event")
+                }
+            }
         }
     ) { padding ->
-        Box(modifier = Modifier
-            .padding(padding)
-            .fillMaxSize()) {
+        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             when (selectedTab) {
-                is HomeTab.Discover -> DiscoverSection(events, likedEvents)
+                is HomeTab.Discover -> DiscoverSection(allEvents, likedEvents, database)
                 is HomeTab.MyEvents -> MyEventsSection(likedEvents)
                 else -> {}
             }
+        }
+
+        if (showDialog) {
+            AddEventDialog(
+                onDismiss = { showDialog = false },
+                onAddEvent = { event ->
+                    scope.launch {
+                        // Insert into Room
+                        withContext(Dispatchers.IO) {
+                            database.eventDao().insertEvent(event)
+                        }
+                        allEvents.add(event)
+                        // Insert into Firestore
+                        FirebaseFirestore.getInstance()
+                            .collection("events")
+                            .add(event.toFirebaseMap())
+                    }
+                    showDialog = false
+                }
+            )
         }
     }
 }
 
 @Composable
-fun DiscoverSection(events: List<Event>, likedEvents: MutableList<Event>) {
+fun DiscoverSection(
+    events: MutableList<Event>,
+    likedEvents: MutableList<Event>,
+    database: AppDatabase
+) {
     val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
     val today = LocalDate.now()
+    val scope = rememberCoroutineScope()
 
     LazyColumn(modifier = Modifier.padding(16.dp)) {
         items(events) { event ->
@@ -115,23 +239,56 @@ fun DiscoverSection(events: List<Event>, likedEvents: MutableList<Event>) {
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = event.title, style = MaterialTheme.typography.titleLarge)
-                    Text(text = "Date: ${event.date.format(formatter)}")
-                    Text(text = "Location: ${event.location}")
+                    Text(event.title, style = MaterialTheme.typography.titleLarge)
+                    Text("Date: ${event.date.format(formatter)}")
+                    Text("Location: ${event.location}")
                     if (event.date.isBefore(today)) {
-                        Text(text = "This event has passed", color = MaterialTheme.colorScheme.error)
+                        Text("This event has passed", color = MaterialTheme.colorScheme.error)
                     }
 
-                    IconButton(
-                        onClick = {
-                            if (event in likedEvents) likedEvents.remove(event)
-                            else likedEvents.add(event)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = {
+                            val updated = event.copy(isLiked = !event.isLiked)
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    database.eventDao().insertEvent(updated)
+                                }
+                                // Update the events list to reflect the change in UI
+                                val index = events.indexOfFirst { it.title == event.title && it.date == event.date }
+                                if (index != -1) {
+                                    events[index] = updated
+                                }
+                                if (updated.isLiked) {
+                                    // Add if not already in likedEvents
+                                    if (likedEvents.none { it.title == updated.title && it.date == updated.date }) {
+                                        likedEvents.add(updated)
+                                    }
+                                } else {
+                                    // Remove if unliked
+                                    likedEvents.removeAll { it.title == updated.title && it.date == updated.date }
+                                }
+                            }
+                        }) {
+                            Icon(
+                                imageVector = if (event.isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                                contentDescription = "Like"
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = if (event in likedEvents) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                            contentDescription = "Like"
-                        )
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        IconButton(onClick = {
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    database.eventDao().deleteEvent(event)
+                                    deleteEventFromFirebase(event.title, event.date)
+                                }
+                                events.remove(event)
+                                likedEvents.removeAll { it.title == event.title && it.date == event.date }
+                            }
+                        }) {
+                            Icon(Icons.Filled.Delete, contentDescription = "Delete Event")
+                        }
                     }
                 }
             }
@@ -141,12 +298,12 @@ fun DiscoverSection(events: List<Event>, likedEvents: MutableList<Event>) {
 
 @Composable
 fun MyEventsSection(likedEvents: List<Event>) {
+    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
     if (likedEvents.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("You haven't liked any events yet.")
         }
     } else {
-        val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
         LazyColumn(modifier = Modifier.padding(16.dp)) {
             items(likedEvents) { event ->
                 Card(
@@ -156,12 +313,65 @@ fun MyEventsSection(likedEvents: List<Event>) {
                     elevation = CardDefaults.cardElevation(4.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = event.title, style = MaterialTheme.typography.titleLarge)
-                        Text(text = "Date: ${event.date.format(formatter)}")
-                        Text(text = "Location: ${event.location}")
+                        Text(event.title, style = MaterialTheme.typography.titleLarge)
+                        Text("Date: ${event.date.format(formatter)}")
+                        Text("Location: ${event.location}")
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+fun AddEventDialog(
+    onDismiss: () -> Unit,
+    onAddEvent: (Event) -> Unit
+) {
+    var title by remember { mutableStateOf("") }
+    var location by remember { mutableStateOf("") }
+    var dateInput by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                try {
+                    val date = LocalDate.parse(dateInput, formatter)
+                    if (title.isNotBlank() && location.isNotBlank()) {
+                        onAddEvent(Event(title = title.trim(), location = location.trim(), date = date))
+                    }
+                } catch (_: Exception) {}
+            }) {
+                Text("Add")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        },
+        title = { Text("Add New Event") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("Title") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = location,
+                    onValueChange = { location = it },
+                    label = { Text("Location") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = dateInput,
+                    onValueChange = { dateInput = it },
+                    label = { Text("Date (dd/MM/yyyy)") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    )
 }

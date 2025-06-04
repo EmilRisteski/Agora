@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
-    // Removed the duplicate Kotlin Android plugin here
+    id("org.jetbrains.kotlin.kapt") // ✅ KAPT plugin for Room
 }
 
 android {
@@ -16,7 +16,6 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -29,15 +28,22 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.0"
     }
 }
 
@@ -51,16 +57,38 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
+    // Firebase
     implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.android.gms:play-services-auth:20.5.0")
-    implementation("com.facebook.android:facebook-login:18.0.3")
-    implementation("com.jakewharton.threetenabp:threetenabp:1.4.5")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-messaging-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
 
+    // Google + Facebook Auth
+    implementation("com.google.android.gms:play-services-auth:20.5.0")
+    implementation("com.facebook.android:facebook-login:18.0.3")
 
+    // Jetpack Compose Dialogs
+    implementation("io.github.vanpra.compose-material-dialogs:datetime:0.9.0")
+    implementation("io.github.vanpra.compose-material-dialogs:core:0.9.0")
+
+    // MapLibre
+    implementation("org.maplibre.gl:android-sdk:9.5.0")
+
+    // ThreeTenBP
+    implementation("com.jakewharton.threetenabp:threetenabp:1.4.5")
+    implementation("org.threeten:threetenbp:1.5.1:no-tzdb")
+
+    // Compose
+    implementation("androidx.compose.ui:ui:1.6.1")
+
+    // ✅ Room Database
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
+
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

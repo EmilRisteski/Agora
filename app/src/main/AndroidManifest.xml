@@ -55,6 +55,7 @@
             </intent-filter>
         </activity>
 
+
         <!-- SplashActivity is the launcher -->
         <activity
             android:name=".auth.SplashActivity"
