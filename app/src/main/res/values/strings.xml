@@ -1,15 +1,76 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">AgoraApp</string>
+    <string name="app_name" translatable="false">AgoraApp</string>
 
-    <string name="facebook_app_id">2669886676676373</string>
+    <string name="facebook_app_id" translatable="false">2669886676676373</string>
 
     <!-- Facebook login protocol scheme -->
-    <string name="fb_login_protocol_scheme">fb2669886676676373</string>
+    <string name="fb_login_protocol_scheme" translatable="false">fb2669886676676373</string>
 
-    <string name="facebook_client_token">8fbdaa651c5523b78c2f79ef9bd9737f</string>
+    <string name="facebook_client_token" translatable="false">8fbdaa651c5523b78c2f79ef9bd9737f</string>
 
     <!-- Google Web Client ID (replace with value from google-services.json) -->
     <string name="default_web_client_id">149314068234-i9k0lhm5oqhk1m1tp9hg6b1tdch8qm0d.apps.googleusercontent.com</string>
 
+    <!-- LoginActivity Strings -->
+    <string name="login_title">Login</string>
+    <string name="email_label">Email</string>
+    <string name="password_label">Password</string>
+    <string name="login_button">Login</string>
+    <string name="guest_button">Continue as Guest</string>
+    <string name="google_button">Login with Google</string>
+    <string name="facebook_button">Login with Facebook</string>
+    <string name="register_prompt">Dont have an account? Register here</string>
+
+    <string name="login_empty_fields">Please enter email and password</string>
+    <string name="login_success">Login successful</string>
+    <string name="login_failed">Login failed: %1$s</string>
+    <string name="anonymous_login_success">Anonymous login successful!</string>
+    <string name="anonymous_login_failed">Anonymous login failed: %1$s</string>
+    <string name="google_login_success">Google login successful</string>
+    <string name="google_login_failed">Google login failed: %1$s</string>
+    <string name="facebook_login_success">Facebook login successful!</string>
+    <string name="facebook_login_cancelled">Facebook login cancelled.</string>
+    <string name="facebook_login_error">Facebook login error: %1$s</string>
+
+    <!-- RegisterActivity Strings -->
+    <string name="register">Register</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="sign_in_with_facebook">Sign in with Facebook</string>
+    <string name="fill_all_fields">Please fill all fields</string>
+    <string name="passwords_do_not_match">Passwords do not match</string>
+    <string name="registration_success">Registration successful!</string>
+    <string name="registration_failed">Registration failed: %1$s</string>
+    <string name="google_sign_in_failed">Google sign-in failed: %1$s</string>
+    <string name="google_sign_in_success">Google sign-in successful</string>
+    <string name="facebook_login_failed">Facebook login failed: %1$s</string>
+    <string name="facebook_sign_in_success">Facebook sign-in successful</string>
+    <string name="facebook_sign_in_failed">Facebook sign-in failed: %1$s</string>
+
+    <!-- SplashActivity Strings -->
+    <string name="welcome_text">Welcome to Agora</string>
+    <string name="logo_description">App Logo</string>
+
+    <!-- HomeActivity Strings -->
+    <string name="tab_discover">Discover</string>
+    <string name="tab_my_events">My Events</string>
+    <string name="tab_logout">Logout</string>
+    <string name="add_event">Add Event</string>
+    <string name="like_event">Like</string>
+    <string name="delete_event">Delete Event</string>
+    <string name="event_passed">This event has passed</string>
+    <string name="no_liked_events">You havent liked any events yet.</string>
+    <string name="add_new_event">Add New Event</string>
+    <string name="title_label">Title</string>
+    <string name="location_label">Location</string>
+    <string name="date_label">Date</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="ticket_link">Tickets</string>
+
+    <string name="language_switch">Switch Language</string>
+    
 </resources>

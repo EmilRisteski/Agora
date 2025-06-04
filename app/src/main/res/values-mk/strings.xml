@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- LoginActivity Strings (Macedonian) -->
+    <string name="login_title">Најава</string>
+    <string name="email_label">Е-пошта</string>
+    <string name="password_label">Лозинка</string>
+    <string name="login_button">Најави се</string>
+    <string name="guest_button">Продолжи како гостин</string>
+    <string name="google_button">Најави се со Google</string>
+    <string name="facebook_button">Најави се со Facebook</string>
+    <string name="register_prompt">Немаш корисничка сметка? Регистрирај се тука</string>
+
+    <string name="login_empty_fields">Внесете е-пошта и лозинка</string>
+    <string name="login_success">Успешна најава</string>
+    <string name="login_failed">Неуспешна најава: %1$s</string>
+    <string name="anonymous_login_success">Успешна најава како гостин!</string>
+    <string name="anonymous_login_failed">Најавувањето како гостин не успеа: %1$s</string>
+    <string name="google_login_success">Успешна најава со Google</string>
+    <string name="google_login_failed">Најавата со Google не успеа: %1$s</string>
+    <string name="facebook_login_success">Успешна најава со Facebook!</string>
+    <string name="facebook_login_cancelled">Најавата со Facebook е откажана.</string>
+    <string name="facebook_login_error">Грешка при најава со Facebook: %1$s</string>
+
+    <!-- RegisterActivity Strings -->
+    <string name="register">Регистрирај се</string>
+    <string name="email">Е-пошта</string>
+    <string name="password">Лозинка</string>
+    <string name="confirm_password">Потврди лозинка</string>
+    <string name="sign_in_with_google">Најави се со Google</string>
+    <string name="sign_in_with_facebook">Најави се со Facebook</string>
+    <string name="fill_all_fields">Пополнете ги сите полиња</string>
+    <string name="passwords_do_not_match">Лозинките не се совпаѓаат</string>
+    <string name="registration_success">Регистрацијата е успешна!</string>
+    <string name="registration_failed">Регистрацијата не успеа: %1$s</string>
+    <string name="google_sign_in_failed">Google најавувањето не успеа: %1$s</string>
+    <string name="google_sign_in_success">Успешна најава со Google</string>
+    <string name="facebook_login_failed">Најавувањето преку Facebook не успеа: %1$s</string>
+    <string name="facebook_sign_in_success">Успешна најава со Facebook</string>
+    <string name="facebook_sign_in_failed">Најавата со Facebook не успеа: %1$s</string>
+
+    <!-- SplashActivity Strings -->
+    <string name="welcome_text">Добредојдовте во Агора</string>
+    <string name="logo_description">Лого на апликацијата</string>
+
+
+    <!-- HomeActivity Strings -->
+    <string name="tab_discover">Истражи</string>
+    <string name="tab_my_events">Мои Настани</string>
+    <string name="tab_logout">Одјави се</string>
+    <string name="add_event">Додај Настан</string>
+    <string name="like_event">Лајкувај</string>
+    <string name="delete_event">Избриши Настан</string>
+    <string name="event_passed">Овој настан помина</string>
+    <string name="no_liked_events">Сѐ уште немате лајкувано настани.</string>
+    <string name="add_new_event">Додади Нов Настан</string>
+    <string name="title_label">Наслов</string>
+    <string name="location_label">Локација</string>
+    <string name="date_label">Датум</string>
+    <string name="add">Додади</string>
+    <string name="cancel">Откажи</string>
+    <string name="ticket_link">Билети</string>
+    <string name="language_switch">Промени Јазик</string>
+
+</resources>

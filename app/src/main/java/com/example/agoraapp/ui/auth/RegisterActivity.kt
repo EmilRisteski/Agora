@@ -11,11 +11,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.agoraapp.R
 import com.example.agoraapp.HomeActivity
+import com.example.agoraapp.R
 import com.facebook.*
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
@@ -38,7 +39,6 @@ class RegisterActivity : ComponentActivity() {
 
         auth = FirebaseAuth.getInstance()
 
-        // Configure Google Sign-In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
@@ -46,7 +46,6 @@ class RegisterActivity : ComponentActivity() {
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        // Initialize Facebook Login callback manager
         callbackManager = CallbackManager.Factory.create()
         LoginManager.getInstance().registerCallback(callbackManager,
             object : FacebookCallback<LoginResult> {
@@ -55,11 +54,11 @@ class RegisterActivity : ComponentActivity() {
                 }
 
                 override fun onCancel() {
-                    Toast.makeText(this@RegisterActivity, "Facebook login cancelled", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@RegisterActivity, getString(R.string.facebook_login_cancelled), Toast.LENGTH_SHORT).show()
                 }
 
                 override fun onError(exception: FacebookException) {
-                    Toast.makeText(this@RegisterActivity, "Facebook login failed: ${exception.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@RegisterActivity, getString(R.string.facebook_login_failed, exception.message), Toast.LENGTH_SHORT).show()
                 }
             })
 
@@ -68,34 +67,31 @@ class RegisterActivity : ComponentActivity() {
                 onRegisterClick = { email, password, confirmPassword ->
                     registerUser(email, password, confirmPassword)
                 },
-                onGoogleSignInClick = {
-                    signInWithGoogle()
-                },
-                onFacebookSignInClick = {
-                    signInWithFacebook()
-                }
+                onGoogleSignInClick = { signInWithGoogle() },
+                onFacebookSignInClick = { signInWithFacebook() }
             )
         }
     }
 
     private fun registerUser(email: String, password: String, confirmPassword: String) {
         if (email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
-            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show()
             return
         }
+
         if (password != confirmPassword) {
-            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.passwords_do_not_match), Toast.LENGTH_SHORT).show()
             return
         }
 
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.registration_success), Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, HomeActivity::class.java))
                     finish()
                 } else {
-                    Toast.makeText(this, "Registration failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, getString(R.string.registration_failed, task.exception?.message), Toast.LENGTH_LONG).show()
                 }
             }
     }
@@ -114,7 +110,7 @@ class RegisterActivity : ComponentActivity() {
                 val account = task.getResult(ApiException::class.java)!!
                 firebaseAuthWithGoogle(account.idToken!!)
             } catch (e: ApiException) {
-                Toast.makeText(this, "Google sign-in failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.google_sign_in_failed, e.message), Toast.LENGTH_SHORT).show()
             }
         } else {
             callbackManager.onActivityResult(requestCode, resultCode, data)
@@ -126,11 +122,11 @@ class RegisterActivity : ComponentActivity() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(this, "Google sign-in successful", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.google_sign_in_success), Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, HomeActivity::class.java))
                     finish()
                 } else {
-                    Toast.makeText(this, "Google sign-in failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, getString(R.string.google_sign_in_failed, task.exception?.message), Toast.LENGTH_LONG).show()
                 }
             }
     }
@@ -144,11 +140,11 @@ class RegisterActivity : ComponentActivity() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(this, "Facebook sign-in successful", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.facebook_sign_in_success), Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, HomeActivity::class.java))
                     finish()
                 } else {
-                    Toast.makeText(this, "Facebook sign-in failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, getString(R.string.facebook_sign_in_failed, task.exception?.message), Toast.LENGTH_LONG).show()
                 }
             }
     }
@@ -172,14 +168,14 @@ fun RegisterScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Register", style = MaterialTheme.typography.headlineMedium)
+        Text(stringResource(R.string.register), style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(32.dp))
 
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email") },
+            label = { Text(stringResource(R.string.email)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier.fillMaxWidth()
@@ -190,7 +186,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
+            label = { Text(stringResource(R.string.password)) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -202,7 +198,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
-            label = { Text("Confirm Password") },
+            label = { Text(stringResource(R.string.confirm_password)) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -215,27 +211,25 @@ fun RegisterScreen(
             onClick = { onRegisterClick(email, password, confirmPassword) },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Register")
+            Text(stringResource(R.string.register))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = onGoogleSignInClick,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Sign in with Google")
+            Text(stringResource(R.string.sign_in_with_google))
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
             onClick = onFacebookSignInClick,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Sign in with Facebook")
+            Text(stringResource(R.string.sign_in_with_facebook))
         }
     }
 }
